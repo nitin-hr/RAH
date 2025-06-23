@@ -238,6 +238,43 @@
       .inline input { flex: 1 1 100%; }
       .checkbox-group { grid-template-columns: 1fr; }
     }
+
+     /* Footer Styles */
+    .site-footer {
+      text-align: center;
+      padding: 1.5rem 0;
+      margin: 2rem auto 0;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      letter-spacing: 0.5px;
+      font-size: 0.95rem;
+      opacity: 0.9;
+      max-width: 800px;
+      border-top: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .copyright {
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 600;
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .copyright:hover {
+      animation: gradientPulse 2s infinite;
+    }
+
+    @keyframes gradientPulse {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
   </style>
 </head>
 <body>
@@ -351,6 +388,10 @@
       <button onclick="copyToClipboard('submissionCopy')" class="secondary-btn copy-btn">Copy to Clipboard</button>
       <button onclick="exportAllData()" class="secondary-btn">Export All Data</button>
     </div>
+
+    <footer class="site-footer">
+      <span class="copyright">&copy; 2023 Nitin Jaiswal. All Rights Reserved.</span>
+    </footer>
 
     <!-- New reset button in bottom right corner -->
     <div class="reset-btn" onclick="showResetConfirmation()" title="Clear all fields">
