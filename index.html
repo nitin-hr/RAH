@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recruiter Automation Hub - Secure</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --container: #141c2f;
+      --accent: #3b82f6;
+      --text: #e2e8f0;
+      --success: #10b981;
+      --error: #f87171;
+      --warning: #f59e0b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 1rem;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Reset button styles */
+    .reset-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background: var(--container);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+
+    .reset-btn:hover {
+      background: var(--accent);
+      transform: scale(1.1);
+    }
+
+    .reset-btn i {
+      font-size: 20px;
+      color: var(--text);
+    }
+
+    h1, h2 { text-align: center; }
+
+    .section {
+      background: var(--container);
+      padding: 2rem;
+      border-radius: 1rem;
+      margin: 1.5rem auto;
+      max-width: 800px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      transition: transform 0.2s;
+    }
+
+    .section:hover {
+      transform: translateY(-2px);
+    }
+
+    label, textarea, input, select, button {
+      width: 100%;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    input, textarea, select {
+      background: #1e293b;
+      color: white;
+      border: 1px solid #334155;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      background: #2563eb;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .secondary-btn {
+      background: #334155;
+    }
+
+    .secondary-btn:hover {
+      background: #475569;
+    }
+
+    .inline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .inline input {
+      flex: 1 1 30%;
+    }
+
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .login-box {
+      background: var(--container);
+      padding: 2rem;
+      border-radius: 1rem;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .status-message {
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .success {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--success);
+      color: var(--success);
+      display: block;
+    }
+
+    .error {
+      background: rgba(248, 113, 113, 0.2);
+      border: 1px solid var(--error);
+      color: var(--error);
+      display: block;
+    }
+
+    .warning {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid var(--warning);
+      color: var(--warning);
+      display: block;
+    }
+
+    .copy-btn {
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .template-selector {
+      margin-bottom: 1rem;
+    }
+
+    .loading {
+      position: relative;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .loading::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    @media (max-width: 600px) {
+      .section { padding: 1rem; }
+      .inline input { flex: 1 1 100%; }
+      .checkbox-group { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay" id="loginScreen">
+    <div class="login-box">
+      <h2>🔐 Enter Password</h2>
+      <input id="passwordInput" type="password" placeholder="Enter password" autocomplete="current-password" />
+      <button onclick="checkPassword()">Login</button>
+      <p id="error" class="error" style="display: none;">Incorrect password. Attempts remaining: <span id="attempts">3</span></p>
+    </div>
+  </div>
+
+  <div id="secureContent" style="display: none;">
+    <!-- Removed the old reset logo from the header -->
+    <h1>Recruiter Automation Hub</h1>
+    <div id="statusMessage" class="status-message"></div>
+
+    <!-- All your existing sections remain the same... -->
+    <div class="section">
+      <h2>Step 1: Job Role Input</h2>
+      <input id="jobTitle" type="text" placeholder="Enter Job Title" />
+      <input id="skills" type="text" placeholder="Key Skills (comma separated)" />
+      <input id="jobType" type="text" placeholder="Job Type (Contract/Full-time)" />
+      <input id="workMode" type="text" placeholder="Work Mode (Remote/Hybrid/On-site)" />
+    </div>
+
+    <div class="section">
+      <h2>Step 2: Candidate Sourcing Tracker</h2>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="sourceCiepal"> Ciepal</label>
+        <label><input type="checkbox" id="sourceMonster"> Monster</label>
+        <label><input type="checkbox" id="sourceLinkedIn"> LinkedIn</label>
+        <label><input type="checkbox" id="sourceXray"> Xray</label>
+        <label><input type="checkbox" id="sourceIndeed"> Indeed</label>
+        <label><input type="checkbox" id="sourceDice"> Dice</label>
+        <label><input type="checkbox" id="sourceReferral"> Referral</label>
+        <label><input type="checkbox" id="sourceOther"> Other</label>
+      </div>
+      <textarea id="sourcingNotes" placeholder="Sourcing notes..."></textarea>
+    </div>
+
+    <div class="section">
+      <h2>Step 3: LinkedIn Message Generator</h2>
+      <select id="linkedinTemplate" class="template-selector">
+        <option value="standard">Standard Outreach</option>
+        <option value="referral">Referral Based</option>
+        <option value="followup">Follow-up</option>
+        <option value="cold">Cold Outreach</option>
+      </select>
+      <input id="linkedinName" type="text" placeholder="Candidate Name" />
+      <textarea id="linkedinMessage" rows="4" readonly></textarea>
+      <button onclick="generateLinkedInMessage()">Generate LinkedIn Message</button>
+      <button onclick="copyToClipboard('linkedinMessage')" class="secondary-btn copy-btn">Copy to Clipboard</button>
+    </div>
+
+    <div class="section">
+      <h2>Step 4: Candidate Call Script Generator</h2>
+      <input id="candidateCallName" type="text" placeholder="Candidate Name" />
+      <textarea id="callScript" rows="10" readonly></textarea>
+      <button onclick="generateCallScript()">Generate Call Script</button>
+      <button onclick="copyToClipboard('callScript')" class="secondary-btn copy-btn">Copy to Clipboard</button>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="checkWorkPermit"> Work permit</label>
+        <label><input type="checkbox" id="checkNewRole"> Looking for new role</label>
+        <label><input type="checkbox" id="checkJobType"> Current job type</label>
+        <label><input type="checkbox" id="checkWorkMode"> Work mode</label>
+        <label><input type="checkbox" id="checkArrival"> Arrival in Canada</label>
+        <label><input type="checkbox" id="checkEducation"> Education confirmed</label>
+        <label><input type="checkbox" id="checkTravel"> No travel plans</label>
+        <label><input type="checkbox" id="checkRate"> Rate discussion</label>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Step 5: JD Email Generator</h2>
+      <select id="emailTemplate" class="template-selector">
+        <option value="standard">Standard JD</option>
+        <option value="urgent">Urgent Requirement</option>
+        <option value="exclusive">Exclusive Opportunity</option>
+      </select>
+      <input id="candidateName" type="text" placeholder="Candidate Name" />
+      <input id="jobLink" type="text" placeholder="Job Link" />
+      <input id="clientName" type="text" placeholder="Client Name (optional)" />
+      <textarea id="jdEmail" rows="6" readonly></textarea>
+      <button onclick="generateJDEmail()">Generate JD Email</button>
+      <button onclick="copyToClipboard('jdEmail')" class="secondary-btn copy-btn">Copy to Clipboard</button>
+    </div>
+
+    <div class="section">
+      <h2>Step 6: RTR Mail Generator</h2>
+      <div class="inline">
+        <input id="rtrName" placeholder="Candidate Name" />
+        <input id="rtrRate" placeholder="Rate (CAD/hr)" type="number" />
+        <input id="rtrAvailability" placeholder="Availability" />
+      </div>
+      <div class="inline">
+        <input id="rtrStartDate" type="date" placeholder="Start Date" />
+        <input id="rtrLocation" placeholder="Location" />
+        <input id="rtrDuration" placeholder="Duration (months)" type="number" />
+      </div>
+      <textarea id="rtrEmail" rows="6" readonly></textarea>
+      <button onclick="generateRTR()">Generate RTR Email</button>
+      <button onclick="copyToClipboard('rtrEmail')" class="secondary-btn copy-btn">Copy to Clipboard</button>
+    </div>
+
+    <div class="section">
+      <h2>Step 7: Final Submission Copy</h2>
+      <textarea id="submissionNotes" placeholder="Additional notes..." rows="2"></textarea>
+      <textarea id="submissionCopy" rows="6" readonly></textarea>
+      <button onclick="generateSubmission()">Generate Final Submission Summary</button>
+      <button onclick="copyToClipboard('submissionCopy')" class="secondary-btn copy-btn">Copy to Clipboard</button>
+      <button onclick="exportAllData()" class="secondary-btn">Export All Data</button>
+    </div>
+
+    <!-- New reset button in bottom right corner -->
+    <div class="reset-btn" onclick="showResetConfirmation()" title="Clear all fields">
+      <i class="fas fa-brush"></i>
+    </div>
+
+    <div id="resetConfirmation" class="overlay" style="display: none; background: rgba(0,0,0,0.8);">
+      <div class="login-box">
+        <h2>Confirm Reset</h2>
+        <p>Are you sure you want to clear all fields and reset the form?</p>
+        <p>This action cannot be undone.</p>
+        <div style="display: flex; gap: 1rem;">
+          <button onclick="clearAndReset()" style="background: var(--error);">Yes, Reset</button>
+          <button onclick="hideResetConfirmation()" class="secondary-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Enhanced security with attempt limiting
+    const MAX_ATTEMPTS = 3;
+    let attemptsLeft = MAX_ATTEMPTS;
+    const storedHash = "154b8e7e45aa277d808b5246b2290846"; 
+
+    // Template library
+    const templates = {
+      linkedin: {
+        standard: (name, job) => `Hi ${name},\n\nI'm reaching out from Quantem World Technologies regarding a ${job} opportunity that aligns well with your experience. Would you be open to a quick chat to discuss this potential fit?\n\nBest regards,\nNitin Jaiswal`,
+        referral: (name, job) => `Hi ${name},\n\nI was referred to you by a colleague who thought you'd be a great fit for our ${job} position. I'd love to connect and share more details if you're open to new opportunities.\n\nRegards,\nNitin Jaiswal`,
+        followup: (name, job) => `Hi ${name},\n\nFollowing up on my previous message about the ${job} role. I wanted to check if you had a chance to consider this opportunity? I believe it could be a great match for your skills.\n\nLooking forward to your thoughts.\n\nBest,\nNitin`,
+        cold: (name, job) => `Hi ${name},\n\nI came across your profile and was impressed by your background. We have a ${job} opportunity that might interest you. Would you be available for a quick call this week to discuss?\n\nThanks,\nNitin Jaiswal\nQuantem World Technologies`
+      },
+      email: {
+        standard: (name, job, link, client) => `Hi ${name},\n\nPlease find below the job description for the ${job} role${client ? ` with our client ${client}` : ''}:\n\n${link}\n\nIf this opportunity interests you, please reply with your updated resume and availability for a quick call. Looking forward to your response.\n\nBest regards,\nNitin Jaiswal`,
+        urgent: (name, job, link, client) => `Hi ${name},\n\nWe have an urgent requirement for a ${job}${client ? ` with ${client}` : ''}. Here are the details:\n\n${link}\n\nThis is a priority position with quick turnaround. If interested, please share your updated resume and availability for an immediate discussion.\n\nThanks,\nNitin Jaiswal`,
+        exclusive: (name, job, link, client) => `Hi ${name},\n\nI'm contacting you about an exclusive ${job} opportunity${client ? ` with ${client}` : ''} that hasn't been publicly posted yet. Details here:\n\n${link}\n\nGiven your expertise, I wanted to reach out before we open this up to other candidates. Please let me know if you'd like to discuss further.\n\nRegards,\nNitin Jaiswal`
+      }
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+      // Load all saved data
+      const inputs = document.querySelectorAll("input, textarea, select");
+      inputs.forEach(el => {
+        const key = el.id;
+        const savedValue = localStorage.getItem(key);
+        if (savedValue !== null) {
+          if (el.type === 'checkbox') {
+            el.checked = savedValue === 'true'; // Only set checked if it was true in storage
+          } else {
+            el.value = savedValue;
+          }
+        }
+        el.addEventListener("input", () => {
+          localStorage.setItem(key, el.type === 'checkbox' ? el.checked : el.value);
+        });
+      });
+
+      // Enter key to submit password
+      document.getElementById("passwordInput").addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          checkPassword();
+        }
+      });
+    });
+
+    function checkPassword() {
+      const input = document.getElementById("passwordInput").value;
+      const hashedInput = CryptoJS.MD5(input).toString();
+      const errorElement = document.getElementById("error");
+      
+      if (attemptsLeft <= 0) {
+        errorElement.textContent = "Maximum attempts reached. Please try again later.";
+        errorElement.style.display = "block";
+        return;
+      }
+
+      if (hashedInput === storedHash) {
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("secureContent").style.display = "block";
+        showStatus("Login successful!", "success");
+      } else {
+        attemptsLeft--;
+        document.getElementById("attempts").textContent = attemptsLeft;
+        errorElement.style.display = "block";
+        
+        if (attemptsLeft <= 0) {
+          errorElement.textContent = "Account locked. Please try again later.";
+          document.getElementById("passwordInput").disabled = true;
+        }
+      }
+    }
+
+    function showStatus(message, type) {
+      const statusElement = document.getElementById("statusMessage");
+      statusElement.textContent = message;
+      statusElement.className = "status-message " + type;
+      setTimeout(() => {
+        statusElement.style.opacity = "0";
+        setTimeout(() => {
+          statusElement.style.display = "none";
+          statusElement.style.opacity = "1";
+        }, 500);
+      }, 3000);
+    }
+
+    function clearAndReset() {
+      localStorage.clear();
+      hideResetConfirmation();
+      showStatus("All fields have been reset", "success");
+      setTimeout(() => location.reload(), 1000);
+    }
+
+    function showResetConfirmation() {
+      document.getElementById("resetConfirmation").style.display = "flex";
+    }
+
+    function hideResetConfirmation() {
+      document.getElementById("resetConfirmation").style.display = "none";
+    }
+
+    function copyToClipboard(elementId) {
+      const element = document.getElementById(elementId);
+      element.select();
+      document.execCommand("copy");
+      showStatus("Copied to clipboard!", "success");
+    }
+
+    function generateLinkedInMessage() {
+      const name = document.getElementById("linkedinName").value || '[Name]';
+      const job = document.getElementById("jobTitle").value || '[Job Title]';
+      const template = document.getElementById("linkedinTemplate").value;
+      
+      document.getElementById("linkedinMessage").value = templates.linkedin[template](name, job);
+      showStatus("LinkedIn message generated!", "success");
+    }
+
+    function generateCallScript() {
+      const name = document.getElementById("candidateCallName").value || '[Candidate Name]';
+      const job = document.getElementById("jobTitle").value || '[Role]';
+      const skills = document.getElementById("skills").value || '[Skills/Tools]';
+      const jobType = document.getElementById("jobType").value || '[Job Type]';
+      const workMode = document.getElementById("workMode").value || '[Work Mode]';
+
+      let script = `STEP 1: INTRODUCTION & INITIAL CONFIRMATION\nYou:\n"Hi, may I speak with ${name}?"\n\nCandidate:\n"Yes, this is [Candidate]."\n\nYou:\n"This is Nitin Jaiswal calling from Quantem World Technologies. I'm reaching out regarding a job opportunity. May I know if you are currently available in the job market?"\n\nCandidate Response Options:\n- Yes, I'm available → Proceed\n- No, I'm not available → Politely end the call\n`;
+
+      if (document.getElementById("checkWorkPermit").checked) {
+        script += `\n✅ WORK AUTHORIZATION VERIFICATION\nYou:\n"Could you please confirm your work authorization status in Canada?\nAre you a:\n• Permanent Resident (PR)\n• Open Work Permit (OWP) holder\n• Canadian Citizen?"\n\nIf PR:\n- "How did you get your PR?"\n- "Can you share a copy of your PR card?"\n→ If hesitant: "You can blur sensitive info — we just need to verify your legal name."\n\nIf OWP:\n- "What is the validity of your OWP?"\n- "Please share your updated resume and any legal ID like a driver's license."\n\nIf Canadian Citizen:\n- "Please confirm in writing via email that you're a Canadian citizen and provide your full legal name."\n`;
+      }
+
+      script += `\n✅ SHARE JOB DESCRIPTION\nYou:\n"Let me quickly walk you through the job description.\nWe are looking for a candidate in the ${job} domain. It involves working with ${skills}.\nThe role is ${workMode}, and it's a ${jobType} opportunity."\n`;
+
+      if (document.getElementById("checkNewRole").checked) {
+        script += `\n✅ CURRENT/PREVIOUS JOB DETAILS\nYou:\n"Could you tell me about your most recent job or project? Was it Full-time or Contract?"\n\nIf Full-Time:\n- "Why are you switching from full-time to a new role?"\n- "Do you have any notice period to serve?"\n\nIf Contract:\n- "When is your current contract ending (or has it ended)?"\n- "When would you be available to join this new role?"\n`;
+      }
+
+      if (document.getElementById("checkWorkMode").checked) {
+        script += `\n✅ WORK MODE IN LAST ROLE\nYou:\n"Was your last role remote, hybrid, or on-site?"\n\nIf hybrid:\n- "Is this new role's location within your city?"\n- "Will you be able to commute if required?"\n`;
+      }
+
+      if (document.getElementById("checkArrival").checked) {
+        script += `\n✅ LOCATION & ARRIVAL IN CANADA\nYou:\n"May I know your current location in Canada?\nAlso, if you're not a Canadian citizen, when did you arrive in Canada?"\n`;
+      }
+
+      if (document.getElementById("checkRate").checked) {
+        script += `\n✅ RATE EXPECTATIONS & RTR\nYou:\n"What are your rate expectations for this contract?"\n\n→ Negotiate if needed.\n\nOnce finalized:\n"I'll send you a Rate Confirmation (RTR) email. Please reply with a written confirmation agreeing to the rate and including your full legal name."\n`;
+      }
+
+      if (document.getElementById("checkEducation").checked) {
+        script += `\n✅ EDUCATION VERIFICATION\nYou:\n"I just need to verify your education details. Are they mentioned in your resume?"\n\nIf yes:\n- "Great, just confirming – [Read out education]."\n\nIf no:\n- "Please email me a short summary including Degree, University, Year of Passing, and Location so I can update your resume."\n`;
+      }
+
+      if (document.getElementById("checkTravel").checked) {
+        script += `\n✅ TRAVEL/AVAILABILITY CHECK\nYou:\n"Lastly, do you have any travel plans or long leaves planned in the next three months?"\n\nIf No:\n- "Perfect, this is a client requirement."\n\nIf Yes:\n- "Please share the dates — I'll check if it's manageable."\n`;
+      }
+
+      script += `\n✅ FINAL WRAP-UP\nYou:\n"Thanks for all the information. Please send the required documents and confirmations by email, and I'll proceed with your submission. I'll keep you updated with the next steps."`;
+
+      document.getElementById("callScript").value = script;
+      showStatus("Call script generated with selected sections!", "success");
+    }
+
+    function generateJDEmail() {
+      const name = document.getElementById("candidateName").value || '[Candidate Name]';
+      const job = document.getElementById("jobTitle").value || '[Job Title]';
+      const link = document.getElementById("jobLink").value || '[Job Link]';
+      const client = document.getElementById("clientName").value;
+      const template = document.getElementById("emailTemplate").value;
+      
+      document.getElementById("jdEmail").value = templates.email[template](name, job, link, client);
+      showStatus("JD email generated!", "success");
+    }
+
+    function generateRTR() {
+      const name = document.getElementById("rtrName").value || '[Candidate Name]';
+      const rate = document.getElementById("rtrRate").value || '[Rate]';
+      const avail = document.getElementById("rtrAvailability").value || '[Availability]';
+      const startDate = document.getElementById("rtrStartDate").value || '[Start Date]';
+      const location = document.getElementById("rtrLocation").value || '[Location]';
+      const duration = document.getElementById("rtrDuration").value || '[Duration]';
+
+      const formattedDate = startDate === '[Start Date]' ? startDate : new Date(startDate).toLocaleDateString('en-CA');
+      
+      document.getElementById("rtrEmail").value = `Hi ${name},\n\nAs per our discussion, please confirm the following details:\n\n• Rate: CAD ${rate}/hr\n• Availability: ${avail}\n• Start Date: ${formattedDate}\n• Location: ${location}\n• Duration: ${duration} months\n\nPlease reply with your confirmation to proceed with the submission.\n\nRegards,\nNitin Jaiswal\nQuantem World Technologies`;
+      showStatus("RTR email generated!", "success");
+    }
+
+    function generateSubmission() {
+      const name = document.getElementById("rtrName").value || '[Candidate Name]';
+      const job = document.getElementById("jobTitle").value || '[Job Title]';
+      const rate = document.getElementById("rtrRate").value || '[Rate]';
+      const avail = document.getElementById("rtrAvailability").value || '[Availability]';
+      const notes = document.getElementById("submissionNotes").value;
+      const skills = document.getElementById("skills").value || '[Skills]';
+      const workMode = document.getElementById("workMode").value || '[Work Mode]';
+      const jobType = document.getElementById("jobType").value || '[Job Type]';
+      
+      let submission = `CANDIDATE SUBMISSION SUMMARY\n\n`;
+      submission += `Candidate: ${name}\n`;
+      submission += `Job Title: ${job}\n`;
+      submission += `Key Skills: ${skills}\n`;
+      submission += `Rate: CAD ${rate}/hr\n`;
+      submission += `Availability: ${avail}\n`;
+      submission += `Work Mode: ${workMode}\n`;
+      submission += `Job Type: ${jobType}\n`;
+      
+      if (notes) {
+        submission += `\nAdditional Notes:\n${notes}\n`;
+      }
+      
+      submission += `\nAll required documents have been verified and are attached. Ready for submission to the client.`;
+      
+      document.getElementById("submissionCopy").value = submission;
+      showStatus("Submission summary generated!", "success");
+    }
+
+    function exportAllData() {
+      const data = {};
+      document.querySelectorAll("input, textarea, select").forEach(el => {
+        if (el.id) {
+          data[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+        }
+      });
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `recruiter-data-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showStatus("All data exported successfully!", "success");
+    }
+  </script>
+</body>
+</html>
